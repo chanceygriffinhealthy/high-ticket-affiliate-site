@@ -1,0 +1,277 @@
+import React, { useEffect, useMemo, useState } from "react";
+
+// High-Ticket Affiliate Site — Vercel-ready (no ZIP)
+// Your Digistore24 link is prefilled below. Change anytime in /public/offers.json or here.
+
+const FALLBACK_OFFERS = [
+  {
+    id: "your-offer",
+    brand: "Your Offer",
+    category: "Other",
+    tagline: "Special promo you recommend",
+    commission: "High-ticket (enter exact terms)",
+    cookie: "Per program",
+    price_hint: "—",
+    pros: ["Strong payouts", "Great conversion"],
+    cons: ["Add realistic cons"],
+    url: "https://getmydigestsync24.com/text.php#aff=healthychance"
+  },
+  {
+    id: "kinsta",
+    brand: "Kinsta",
+    category: "Hosting",
+    tagline: "Managed WordPress & Apps on Google Cloud",
+    commission: "$50–$500 one-time + 10% lifetime",
+    cookie: "60 days",
+    price_hint: "Plans from ~$35/mo",
+    pros: ["Fast, secure, great support", "Simple dashboards", "Recurring payouts"],
+    cons: ["Premium pricing"],
+    url: "https://example.com/kinsta-aff"
+  },
+  {
+    id: "wpengine",
+    brand: "WP Engine",
+    category: "Hosting",
+    tagline: "Premium WordPress hosting",
+    commission: "$200+ CPA",
+    cookie: "180 days",
+    price_hint: "From ~$20–30/mo",
+    pros: ["High CPA", "Trusted brand"],
+    cons: ["WordPress-only"],
+    url: "https://example.com/wpengine-aff"
+  }
+];
+
+const CATEGORIES = ["All", "Hosting", "Marketing SaaS", "Funnels", "Other"];
+const cx = (...xs) => xs.filter(Boolean).join(" ");
+
+export default function App() {
+  const [offers, setOffers] = useState(FALLBACK_OFFERS);
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("All");
+  const [sortKey, setSortKey] = useState("payout");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/offers.json", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length) setOffers(data);
+        }
+      } catch {}
+    })();
+  }, []);
+
+  const filtered = useMemo(() => {
+    return offers
+      .filter(o => (category === "All" ? true : o.category === category))
+      .filter(o => {
+        const q = query.trim().toLowerCase();
+        if (!q) return true;
+        return (
+          o.brand.toLowerCase().includes(q) ||
+          o.tagline.toLowerCase().includes(q) ||
+          (o.pros || []).some(p => p.toLowerCase().includes(q)) ||
+          (o.cons || []).some(c => c.toLowerCase().includes(q))
+        );
+      })
+      .sort((a, b) => {
+        if (sortKey === "brand") return a.brand.localeCompare(b.brand);
+        if (sortKey === "category") return a.category.localeCompare(b.category);
+        if (sortKey === "payout") return (b.commission || "").length - (a.commission || "").length;
+        return 0;
+      });
+  }, [offers, category, query, sortKey]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 text-gray-900">
+      <header className="sticky top-0 z-40 backdrop-blur bg-white/80 border-b border-gray-100">
+        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 12h16M4 12c0-4.418 3.582-8 8-8m0 16c-4.418 0-8-3.582-8-8m16 0c0 4.418-3.582 8-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <span className="font-semibold">High-Ticket Picks</span>
+          </div>
+          <a href="#subscribe" className="text-sm underline underline-offset-4">Get the free buyer’s guide →</a>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-6xl px-4 pt-12 pb-8">
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Compare & Promote <span className="bg-yellow-200 px-2 rounded">High-Ticket</span> Offers
+            </h1>
+            <p className="mt-3 text-lg text-gray-600">
+              Plug in your links, capture leads, and (optionally) auto-update from a Google Sheet.
+            </p>
+            <ul className="mt-4 space-y-2 text-sm text-gray-700 list-disc pl-5">
+              <li>Search, filter, and compare cards</li>
+              <li>Lead capture form (Formspree/ConvertKit-friendly)</li>
+              <li>FTC disclosure in footer</li>
+            </ul>
+            <div className="mt-6 flex gap-3">
+              <a href="#offers" className="inline-flex items-center px-5 py-2.5 rounded-2xl shadow bg-black text-white">Browse Offers</a>
+              <a href="#how" className="inline-flex items-center px-5 py-2.5 rounded-2xl border border-gray-300">How it works</a>
+            </div>
+          </div>
+          <div className="md:pl-6">
+            <div className="p-4 rounded-2xl border bg-white shadow-sm">
+              <p className="text-sm text-gray-600">Quick setup</p>
+              <ol className="mt-2 space-y-1 text-sm list-decimal pl-5">
+                <li>Replace affiliate links in the cards</li>
+                <li>Optional: Publish /offers.json from a Sheet</li>
+                <li>Deploy on Vercel</li>
+              </ol>
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="rounded-xl border p-3">Auto-updates</div>
+                <div className="rounded-xl border p-3">SEO-friendly</div>
+                <div className="rounded-xl border p-3">Fast & light</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4" id="offers">
+        <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+          <div className="flex gap-2 flex-wrap">
+            {CATEGORIES.map((c) => (
+              <button key={c} onClick={() => setCategory(c)} className={cx("px-3 py-1.5 rounded-full text-sm border", c === category ? "bg-black text-white" : "bg-white hover:bg-gray-50")}>{c}</button>
+            ))}
+          </div>
+          <div className="flex gap-2 items-center">
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search brand, features…" className="px-3 py-2 rounded-xl border w-56"/>
+            <select value={sortKey} onChange={(e)=>setSortKey(e.target.value)} className="px-3 py-2 rounded-xl border">
+              <option value="payout">Sort: Best payout</option>
+              <option value="brand">Sort: Brand A→Z</option>
+              <option value="category">Sort: Category</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((o) => (
+            <div key={o.id} className="rounded-2xl border bg-white shadow-sm p-4 flex flex-col">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-xl font-semibold">{o.brand}</h3>
+                  <p className="text-sm text-gray-600">{o.tagline}</p>
+                </div>
+                <span className="text-[11px] bg-gray-100 px-2 py-1 rounded-full">{o.category}</span>
+              </div>
+
+              <dl className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                <div className="rounded-xl bg-gray-50 p-3">
+                  <dt className="text-gray-500">Commission</dt>
+                  <dd className="font-medium">{o.commission}</dd>
+                </div>
+                <div className="rounded-xl bg-gray-50 p-3">
+                  <dt className="text-gray-500">Cookie</dt>
+                  <dd className="font-medium">{o.cookie}</dd>
+                </div>
+                <div className="rounded-xl bg-gray-50 p-3">
+                  <dt className="text-gray-500">Price</dt>
+                  <dd className="font-medium">{o.price_hint}</dd>
+                </div>
+                <div className="rounded-xl bg-gray-50 p-3">
+                  <dt className="text-gray-500">Fit</dt>
+                  <dd className="font-medium">High-intent buyers</dd>
+                </div>
+              </dl>
+
+              <div className="mt-3 grid grid-cols-1 gap-2 text-sm">
+                <div>
+                  <p className="text-gray-500 mb-1">Pros</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {(o.pros||[]).map((p, i)=> <li key={i}>{p}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-gray-500 mb-1">Cons</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {(o.cons||[]).map((p, i)=> <li key={i}>{p}</li>)}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="mt-auto pt-4 flex gap-2">
+                <a href={o.url} target="_blank" rel="nofollow noopener" className="flex-1 inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-black text-white">Get Deal</a>
+                <a href={`/#compare-${o.id}`} className="px-4 py-2.5 rounded-xl border">Compare</a>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 rounded-2xl border bg-white shadow-sm p-4" id="compare">
+          <h2 className="text-lg font-semibold">Quick comparison</h2>
+          <div className="mt-3 overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-500">
+                  <th className="py-2 pr-4">Brand</th>
+                  <th className="py-2 pr-4">Commission</th>
+                  <th className="py-2 pr-4">Cookie</th>
+                  <th className="py-2 pr-4">Category</th>
+                  <th className="py-2 pr-4">Price hint</th>
+                  <th className="py-2 pr-4">Link</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(o => (
+                  <tr key={o.id} className="border-t">
+                    <td className="py-2 pr-4 font-medium">{o.brand}</td>
+                    <td className="py-2 pr-4">{o.commission}</td>
+                    <td className="py-2 pr-4">{o.cookie}</td>
+                    <td className="py-2 pr-4">{o.category}</td>
+                    <td className="py-2 pr-4">{o.price_hint}</td>
+                    <td className="py-2 pr-4"><a href={o.url} target="_blank" rel="nofollow noopener" className="underline">Promo link</a></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 mt-12" id="how">
+        <div className="rounded-2xl border bg-white shadow-sm p-5">
+          <h2 className="text-xl font-semibold">How this site automates</h2>
+          <ol className="mt-3 list-decimal pl-5 space-y-2 text-sm text-gray-700">
+            <li>Create a Google Sheet with columns: brand, category, tagline, commission, cookie, price_hint, pros (|-separated), cons (|-separated), url.</li>
+            <li>Expose it as JSON (Sheety / Sheet.best) and save link as <code>/public/offers.json</code> or paste into the fetch URL.</li>
+            <li>Update the sheet anytime → site fetches fresh offers on load.</li>
+            <li>Swap the email form action (below) to your provider for automated sequences.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 mt-12 mb-16" id="subscribe">
+        <div className="rounded-2xl border bg-white shadow-sm p-5 grid md:grid-cols-3 gap-4 items-center">
+          <div className="md:col-span-2">
+            <h2 className="text-xl font-semibold">Free Buyer’s Guide: Choosing High-Ticket Offers</h2>
+            <p className="text-sm text-gray-600 mt-1">Enter your email to get our short guide + deal alerts.</p>
+          </div>
+          <form action="https://formspree.io/f/your-form-id" method="POST" className="flex gap-2">
+            <input name="email" type="email" required placeholder="you@example.com" className="flex-1 px-3 py-2 rounded-xl border"/>
+            <button className="px-4 py-2 rounded-xl bg-black text-white">Send</button>
+          </form>
+        </div>
+        <p className="text-[11px] text-gray-500">By subscribing, you agree to receive emails. Unsubscribe anytime.</p>
+      </section>
+
+      <footer className="border-t bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-gray-600 space-y-2">
+          <p><strong>Affiliate disclosure:</strong> Some links on this page are affiliate links. If you click and purchase, we may earn a commission at no extra cost to you.</p>
+          <div className="flex flex-wrap gap-3">
+            <a href="#" className="underline">Privacy</a>
+            <a href="#" className="underline">Terms</a>
+            <a href="#" className="underline">Contact</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
