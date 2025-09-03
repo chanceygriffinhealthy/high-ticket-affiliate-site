@@ -1,0 +1,26 @@
+[
+  {
+    "id": "your-offer",
+    "brand": "Your Offer",
+    "category": "Other",
+    "tagline": "Special promo you recommend",
+    "commission": "High-ticket (enter exact terms)",
+    "cookie": "Per program",
+    "price_hint": "—",
+    "pros": ["Strong payouts", "Great conversion"],
+    "cons": ["Add realistic cons"],
+    "url": "https://getmydigestsync24.com/text.php#aff=healthychance"
+  },
+  {
+    "id": "kinsta",
+    "brand": "Kinsta",
+    "category": "Hosting",
+    "tagline": "Managed WordPress & Apps on Google Cloud",
+    "commission": "$50–$500 one-time + 10% lifetime",
+    "cookie": "60 days",
+    "price_hint": "Plans from ~$35/mo",
+    "pros": ["Fast, secure, great support", "Simple dashboards", "Recurring payouts"],
+    "cons": ["Premium pricing"],
+    "url": "https://example.com/kinsta-aff"
+  }
+]
